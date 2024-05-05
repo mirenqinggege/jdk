@@ -273,6 +273,54 @@ class CachingCgroupController : public CHeapObj<mtInternal> {
     CgroupController* controller() { return _controller; }
 };
 
+<<<<<<< Updated upstream
+||||||| Stash base
+class CgroupCpuController: public CgroupController {
+  public:
+    virtual int cpu_quota() = 0;
+    virtual int cpu_period() = 0;
+    virtual int cpu_shares() = 0;
+    virtual char *subsystem_path() = 0;
+};
+
+class CgroupMemoryController: public CgroupController {
+  public:
+    virtual jlong read_memory_limit_in_bytes(julong upper_bound) = 0;
+    virtual jlong memory_usage_in_bytes() = 0;
+    virtual jlong memory_and_swap_limit_in_bytes(julong host_mem, julong host_swap) = 0;
+    virtual jlong memory_and_swap_usage_in_bytes(julong host_mem, julong host_swap) = 0;
+    virtual jlong memory_soft_limit_in_bytes(julong upper_bound) = 0;
+    virtual jlong memory_max_usage_in_bytes() = 0;
+    virtual jlong rss_usage_in_bytes() = 0;
+    virtual jlong cache_usage_in_bytes() = 0;
+    virtual char *subsystem_path() = 0;
+};
+
+
+=======
+class CgroupCpuController: public CgroupController {
+  public:
+    virtual int cpu_quota() = 0;
+    virtual int cpu_period() = 0;
+    virtual int cpu_shares() = 0;
+    virtual const char *subsystem_path() = 0;
+};
+
+class CgroupMemoryController: public CgroupController {
+  public:
+    virtual jlong read_memory_limit_in_bytes(julong upper_bound) = 0;
+    virtual jlong memory_usage_in_bytes() = 0;
+    virtual jlong memory_and_swap_limit_in_bytes(julong host_mem, julong host_swap) = 0;
+    virtual jlong memory_and_swap_usage_in_bytes(julong host_mem, julong host_swap) = 0;
+    virtual jlong memory_soft_limit_in_bytes(julong upper_bound) = 0;
+    virtual jlong memory_max_usage_in_bytes() = 0;
+    virtual jlong rss_usage_in_bytes() = 0;
+    virtual jlong cache_usage_in_bytes() = 0;
+    virtual const char *subsystem_path() = 0;
+};
+
+
+>>>>>>> Stashed changes
 class CgroupSubsystem: public CHeapObj<mtInternal> {
   protected:
     void initialize_hierarchy();

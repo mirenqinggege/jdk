@@ -36,6 +36,104 @@ class CgroupV1Controller: public CgroupController {
     CgroupV1Controller(const char *root, const char *mountpoint) : CgroupController(root, mountpoint) {}
 };
 
+<<<<<<< Updated upstream
+||||||| Stash base
+class CgroupV1MemoryController: public CgroupV1Controller, public CgroupMemoryController {
+
+  public:
+    bool is_hierarchical() { return _uses_mem_hierarchy; }
+    void set_subsystem_path(char *cgroup_path);
+    jlong read_memory_limit_in_bytes(julong upper_bound);
+    jlong memory_usage_in_bytes();
+    jlong memory_and_swap_limit_in_bytes(julong host_mem, julong host_swap);
+    jlong memory_and_swap_usage_in_bytes(julong host_mem, julong host_swap);
+    jlong memory_soft_limit_in_bytes(julong upper_bound);
+    jlong memory_max_usage_in_bytes();
+    jlong rss_usage_in_bytes();
+    jlong cache_usage_in_bytes();
+    jlong kernel_memory_usage_in_bytes();
+    jlong kernel_memory_limit_in_bytes(julong host_mem);
+    jlong kernel_memory_max_usage_in_bytes();
+    char *subsystem_path() override { return CgroupV1Controller::subsystem_path(); }
+  private:
+    /* Some container runtimes set limits via cgroup
+     * hierarchy. If set to true consider also memory.stat
+     * file if everything else seems unlimited */
+    bool _uses_mem_hierarchy;
+    jlong uses_mem_hierarchy();
+    void set_hierarchical(bool value) { _uses_mem_hierarchy = value; }
+    jlong read_mem_swappiness();
+    jlong read_mem_swap(julong host_total_memsw);
+
+  public:
+    CgroupV1MemoryController(char *root, char *mountpoint) : CgroupV1Controller(root, mountpoint) {
+      _uses_mem_hierarchy = false;
+    }
+
+};
+
+class CgroupV1CpuController: public CgroupV1Controller, public CgroupCpuController {
+
+  public:
+    int cpu_quota();
+    int cpu_period();
+    int cpu_shares();
+
+  public:
+    CgroupV1CpuController(char *root, char *mountpoint) : CgroupV1Controller(root, mountpoint) {
+    }
+    char *subsystem_path() override { return CgroupV1Controller::subsystem_path(); }
+};
+
+=======
+class CgroupV1MemoryController: public CgroupV1Controller, public CgroupMemoryController {
+
+  public:
+    bool is_hierarchical() { return _uses_mem_hierarchy; }
+    void set_subsystem_path(const char *cgroup_path);
+    jlong read_memory_limit_in_bytes(julong upper_bound);
+    jlong memory_usage_in_bytes();
+    jlong memory_and_swap_limit_in_bytes(julong host_mem, julong host_swap);
+    jlong memory_and_swap_usage_in_bytes(julong host_mem, julong host_swap);
+    jlong memory_soft_limit_in_bytes(julong upper_bound);
+    jlong memory_max_usage_in_bytes();
+    jlong rss_usage_in_bytes();
+    jlong cache_usage_in_bytes();
+    jlong kernel_memory_usage_in_bytes();
+    jlong kernel_memory_limit_in_bytes(julong host_mem);
+    jlong kernel_memory_max_usage_in_bytes();
+    const char *subsystem_path() override { return CgroupV1Controller::subsystem_path(); }
+  private:
+    /* Some container runtimes set limits via cgroup
+     * hierarchy. If set to true consider also memory.stat
+     * file if everything else seems unlimited */
+    bool _uses_mem_hierarchy;
+    jlong uses_mem_hierarchy();
+    void set_hierarchical(bool value) { _uses_mem_hierarchy = value; }
+    jlong read_mem_swappiness();
+    jlong read_mem_swap(julong host_total_memsw);
+
+  public:
+    CgroupV1MemoryController(char *root, char *mountpoint) : CgroupV1Controller(root, mountpoint) {
+      _uses_mem_hierarchy = false;
+    }
+
+};
+
+class CgroupV1CpuController: public CgroupV1Controller, public CgroupCpuController {
+
+  public:
+    int cpu_quota();
+    int cpu_period();
+    int cpu_shares();
+
+  public:
+    CgroupV1CpuController(char *root, char *mountpoint) : CgroupV1Controller(root, mountpoint) {
+    }
+    char *subsystem_path() override { return CgroupV1Controller::subsystem_path(); }
+};
+
+>>>>>>> Stashed changes
 class CgroupV1Subsystem: public CgroupSubsystem {
 
   public:
