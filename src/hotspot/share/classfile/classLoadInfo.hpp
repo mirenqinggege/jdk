@@ -29,8 +29,6 @@
 
 class InstanceKlass;
 
-template <typename T> class GrowableArray;
-
 class ClassInstanceInfo : public StackObj {
  private:
   InstanceKlass* _dynamic_nest_host;
