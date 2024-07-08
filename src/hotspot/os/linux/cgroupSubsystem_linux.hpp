@@ -171,13 +171,13 @@ class CgroupController: public CHeapObj<mtInternal> {
                                 _mount_point(os::strdup(mountpoint)),
                                 _read_only(ro) {
     }
-    // Shallow copy constructor
-    CgroupController(const CgroupController& o) : _root(o._root),
-                                                  _mount_point(o._mount_point),
+    CgroupController(const CgroupController& o) : _root(os::strdup(o._root)),
+                                                  _mount_point(os::strdup(o._mount_point)),
                                                   _read_only(o._read_only),
-                                                  _cgroup_path(o._cgroup_path),
-                                                  _path(o._path) {
+                                                  _cgroup_path(!o._cgroup_path ? nullptr : os::strdup(o._cgroup_path)),
+                                                  _path(!o._path ? nullptr : os::strdup(o._path)) {
     }
+    CgroupController& operator=(const CgroupController& o) = delete;
     ~CgroupController() {
       // At least one subsystem controller exists with paths to malloc'd path
       // names
