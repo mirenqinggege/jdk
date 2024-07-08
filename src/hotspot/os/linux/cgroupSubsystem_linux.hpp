@@ -103,9 +103,22 @@
 }
 
 class CgroupController: public CHeapObj<mtInternal> {
+  protected:
+    void set_path(const char *cgroup_path);
+
+    /* mountinfo contents */
+    char *_root;
+    char *_mount_point;
+    bool _read_only;
+    char *_cgroup_path = nullptr;
+
+    /* Constructed subsystem directory */
+    char *_path = nullptr;
+
   public:
-    virtual char* subsystem_path() = 0;
-    virtual bool is_read_only() = 0;
+    void set_subsystem_path(const char *cgroup_path);
+    const char* subsystem_path() { return _path; }
+    bool is_read_only() { return _read_only; }
 
     /* Read a numerical value as unsigned long
      *
@@ -151,6 +164,30 @@ class CgroupController: public CHeapObj<mtInternal> {
      * being set in the provided julong pointer.
      */
     bool read_numerical_key_value(const char* filename, const char* key, julong* result);
+
+    CgroupController(char *root,
+                     char *mountpoint,
+                     bool ro) : _root(os::strdup(root)),
+                                _mount_point(os::strdup(mountpoint)),
+                                _read_only(ro) {
+    }
+    // Shallow copy constructor
+    CgroupController(const CgroupController& o) : _root(o._root),
+                                                  _mount_point(o._mount_point),
+                                                  _read_only(o._read_only),
+                                                  _cgroup_path(o._cgroup_path),
+                                                  _path(o._path) {
+    }
+    ~CgroupController() {
+      // At least one subsystem controller exists with paths to malloc'd path
+      // names
+      os::free(_root);
+      os::free(_mount_point);
+      os::free(_cgroup_path);
+      os::free(_path);
+    }
+
+    bool trim_path(size_t dir_count);
 
   private:
     static jlong limit_from_str(char* limit_str);
@@ -218,9 +255,12 @@ class CgroupMemoryController: public CHeapObj<mtInternal> {
     virtual jlong cache_usage_in_bytes() = 0;
     virtual void print_version_specific_info(outputStream* st, julong host_mem) = 0;
     virtual bool is_read_only() = 0;
+    virtual bool trim_path(size_t dir_count) = 0;
 };
 
 class CgroupSubsystem: public CHeapObj<mtInternal> {
+  protected:
+    void initialize_hierarchy();
   public:
     jlong memory_limit_in_bytes();
     int active_processor_count();
@@ -247,6 +287,8 @@ class CgroupSubsystem: public CHeapObj<mtInternal> {
     jlong rss_usage_in_bytes();
     jlong cache_usage_in_bytes();
     void print_version_specific_info(outputStream* st);
+
+    virtual bool trim_path(size_t dir_count) = 0;
 };
 
 // Utility class for storing info retrieved from /proc/cgroups,
