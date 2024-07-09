@@ -168,7 +168,7 @@ public class NestedCgroup {
             Limits limits = hook(cgexec);
             OutputAnalyzer output = pSystem(cgexec);
             // C++ CgroupController
-            output.shouldMatch("\\[trace\\]\\[os,container\\] Final Memory Limit is: " + limits.integer + "$");
+            output.shouldMatch("\\[trace\\]\\[os,container\\] Memory Limit is: " + limits.integer + "$");
             // Java jdk.internal.platform.CgroupSubsystem
             output.shouldMatch("^ *Memory Limit: " + limits.string + "$");
 

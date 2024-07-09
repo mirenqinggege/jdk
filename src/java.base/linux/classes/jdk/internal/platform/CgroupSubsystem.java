@@ -54,27 +54,18 @@ public interface CgroupSubsystem extends Metrics {
     }
 
     public default void initializeHierarchy(CgroupSubsystemController memory) {
-        int bestLevel = 0;
-        long memoryLimitMin = Long.MAX_VALUE;
-        long memorySwapLimitMin = Long.MAX_VALUE;
 
+        // Here it ignores any possible lower limit in parent directories.
+        // Linux kernel will correctly consider both that but this code does not.
         for (int dirCount = 0; memory.trimPath(dirCount); ++dirCount) {
             long memoryLimit = getMemoryLimit();
-            if (memoryLimit != Long.MAX_VALUE && memoryLimit != CgroupSubsystem.OSCONTAINER_ERROR && memoryLimit < memoryLimitMin) {
-                memoryLimitMin = memoryLimit;
-                bestLevel = dirCount;
-            }
             long memorySwapLimit = getMemoryAndSwapLimit();
-            if (memorySwapLimit != Long.MAX_VALUE && memorySwapLimit != CgroupSubsystem.OSCONTAINER_ERROR && memorySwapLimit < memorySwapLimitMin) {
-                memorySwapLimitMin = memorySwapLimit;
-                bestLevel = dirCount;
-            }
-            // Never use a directory without controller files (disabled by "../cgroup.subtree_control").
-            if (memoryLimit == CgroupSubsystem.OSCONTAINER_ERROR && memorySwapLimit == CgroupSubsystem.OSCONTAINER_ERROR && bestLevel == dirCount) {
-                ++bestLevel;
+            if ((memoryLimit != Long.MAX_VALUE && memoryLimit != CgroupSubsystem.OSCONTAINER_ERROR)
+                || (memorySwapLimit != Long.MAX_VALUE && memorySwapLimit != CgroupSubsystem.OSCONTAINER_ERROR)) {
+                return;
             }
         }
 
-        memory.trimPath(bestLevel);
+        memory.trimPath(0);
     }
 }
