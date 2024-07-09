@@ -58,7 +58,13 @@ public class NestedCgroup {
         // A real usage on x86_64 fits in 39 MiB.
         public static final int MEMORY_MAX_OUTER = 500 * 1024 * 1024;
         public static final int MEMORY_MAX_INNER = MEMORY_MAX_OUTER * 2;
-        public static final String MEMORY_LIMIT_MB = "500.00M";
+        public static final String MEMORY_LIMIT_MB_OUTER = "500.00M";
+        public static final String MEMORY_LIMIT_MB_INNER = "1000.00M";
+
+        class Limits {
+            String string;
+            int integer;
+        };
 
         public static String sysFsCgroup;
         public String memory_max_filename;
@@ -151,6 +157,7 @@ public class NestedCgroup {
             }
             sysFsCgroup = matcher.group(1);
             isCgroup2 = matcher.group(2) != null;
+            System.err.println("isCgroup2 = " + isCgroup2);
 
             System.err.println(LINE_DELIM + " " + (isCgroup2 ? "cgroup2" : "cgroup1") + " mount point: " + sysFsCgroup);
             memory_max_filename = isCgroup2 ? "memory.max" : "memory.limit_in_bytes";
@@ -158,36 +165,50 @@ public class NestedCgroup {
 
             // Here starts a copy of ProcessTools.createJavaProcessBuilder.
             List<String> cgexec = new ArrayList<>();
-            hook(cgexec);
+            Limits limits = hook(cgexec);
             OutputAnalyzer output = pSystem(cgexec);
-            output.shouldMatch("^ *Memory Limit: " + MEMORY_LIMIT_MB + "$");
-            output.shouldMatch("\\[trace\\]\\[os,container\\] " + (isCgroup2 ? "" : "Hierarchical ") + "Memory Limit is: " + MEMORY_MAX_OUTER + "$");
+            // C++ CgroupController
+            output.shouldMatch("\\[trace\\]\\[os,container\\] Final Memory Limit is: " + limits.integer + "$");
+            // Java jdk.internal.platform.CgroupSubsystem
+            output.shouldMatch("^ *Memory Limit: " + limits.string + "$");
 
             pSystem(cgdelete);
         }
 
-        public abstract void hook(List<String> cgexec) throws IOException;
+        public abstract Limits hook(List<String> cgexec) throws IOException;
     }
     private static class TestTwoLimits extends Test {
-        public void hook(List<String> cgexec) throws IOException {
+        public Limits hook(List<String> cgexec) throws IOException {
             // CgroupV1Subsystem::read_memory_limit_in_bytes considered hierarchical_memory_limit only when inner memory.limit_in_bytes is unlimited.
             Files.writeString(Path.of(sysFsCgroup + "/" + CGROUP_OUTER + "/" + CGROUP_INNER + "/" + memory_max_filename), "" + MEMORY_MAX_INNER);
 
             args_add_cgexec(cgexec);
             args_add_self_verbose(cgexec);
             cgexec.add("-version");
+
+            // KFAIL - verify the CgroupSubsystem::initialize_hierarchy() and jdk.internal.platform.CgroupSubsystem.initializeHierarchy() bug
+            // TestTwoLimits does not see the lower MEMORY_MAX_OUTER limit.
+            Limits limits = new Limits();
+            limits.integer = MEMORY_MAX_INNER;
+            limits.string = MEMORY_LIMIT_MB_INNER;
+            return limits;
         }
         public TestTwoLimits() throws Exception {
         }
     }
     private static class TestNoController extends Test {
-        public void hook(List<String> cgexec) throws IOException {
+        public Limits hook(List<String> cgexec) throws IOException {
             args_add_cgexec(cgexec);
             args_add_self(cgexec);
             cgexec.add("NestedCgroup");
             cgexec.add("TestNoController");
             cgexec.add(Test.jdkTool);
             cgexec.add(sysFsCgroup + "/" + CGROUP_OUTER + "/cgroup.subtree_control");
+
+            Limits limits = new Limits();
+            limits.integer = MEMORY_MAX_OUTER;
+            limits.string = MEMORY_LIMIT_MB_OUTER;
+            return limits;
         }
         public TestNoController() throws Exception {
         }
