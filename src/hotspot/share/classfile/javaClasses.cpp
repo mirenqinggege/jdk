@@ -3017,7 +3017,7 @@ static int get_flags(const methodHandle& m) {
   if (m->is_object_initializer()) {
     flags |= java_lang_invoke_MemberName::MN_IS_CONSTRUCTOR;
   } else {
-    assert(!m->is_static_initializer(), "Cannot be static initializer");
+    // Note: Static initializers can be here. Record them as plan methods.
     flags |= java_lang_invoke_MemberName::MN_IS_METHOD;
   }
   if (m->caller_sensitive()) {
