@@ -891,13 +891,13 @@ bool CgroupController::trim_path(size_t dir_count) {
 }
 
 void CgroupSubsystem::initialize_hierarchy() {
-  CgroupMemoryController *memory = memory_controller()->controller();
-
   size_t best_level = 0;
   jlong memory_limit_min = max_jlong;
   jlong memory_swap_limit_min = max_jlong;
 
-  for (size_t dir_count = 0; memory->trim_path(dir_count); ++dir_count) {
+  for (size_t dir_count = 0; memory_controller()->trim_path(dir_count); ++dir_count) {
+    log_trace(os, container)("initialize_hierarchy: dir_count = %zu, best_level = %zu, subsystem_path = %s",
+                             dir_count, best_level, memory_controller()->subsystem_path());
     jlong memory_limit = memory_limit_in_bytes();
     if (memory_limit != -1 && memory_limit != OSCONTAINER_ERROR && memory_limit < memory_limit_min) {
       memory_limit_min = memory_limit;
@@ -914,5 +914,7 @@ void CgroupSubsystem::initialize_hierarchy() {
     }
   }
 
-  memory->trim_path(best_level);
+  memory_controller()->trim_path(best_level);
+  log_trace(os, container)("initialize_hierarchy: best_level = %zu, subsystem_path = %s",
+                           best_level, memory_controller()->subsystem_path());
 }

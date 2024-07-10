@@ -231,6 +231,11 @@ class CachingCgroupController : public CHeapObj<mtInternal> {
 
     CachedMetric* metrics_cache() { return _metrics_cache; }
     T* controller() { return _controller; }
+    bool trim_path(size_t dir_count) {
+      _metrics_cache = new CachedMetric();
+      return controller()->trim_path(dir_count);
+    }
+    const char* subsystem_path() { return controller()->subsystem_path(); }
 };
 
 // Pure virtual class representing version agnostic CPU controllers
@@ -256,6 +261,8 @@ class CgroupMemoryController: public CHeapObj<mtInternal> {
     virtual void print_version_specific_info(outputStream* st, julong host_mem) = 0;
     virtual bool is_read_only() = 0;
     virtual bool trim_path(size_t dir_count) = 0;
+    virtual void set_subsystem_path(const char *cgroup_path) = 0;
+    virtual const char* subsystem_path() = 0;
 };
 
 class CgroupSubsystem: public CHeapObj<mtInternal> {
