@@ -1869,7 +1869,7 @@ static bool select_method(const methodHandle& method, bool want_constructor) {
   if (want_constructor) {
     return method->is_object_initializer();
   } else {
-    return (!method->is_object_initializer() && !method->is_static_initializer() && !method->is_overpass());
+    return !method->is_object_initializer() && !method->is_static_initializer() && !method->is_overpass();
   }
 }
 
