@@ -70,11 +70,12 @@ static void delete_file(const char* filename) {
       << os::strerror(errno) << " (" << errno << ")";
 }
 
+static char slash[] = "/";
 class TestController : public CgroupController {
-private:
-  static inline char slash[] = "/";
 public:
-  TestController(char* p): CgroupController(slash, p, true/*ro*/) {}
+  TestController(char* p): CgroupController(slash, slash, true/*ro*/) {
+    set_subsystem_path(p);
+  }
   TestController() : TestController(slash) {}
 };
 
@@ -200,8 +201,8 @@ TEST(cgroupTest, read_number_null) {
 }
 
 TEST(cgroupTest, read_string_beyond_max_path) {
-  char larger_than_max[MAXPATHLEN + 1];
-  for (int i = 0; i < (MAXPATHLEN); i++) {
+  char larger_than_max[MAXPATHLEN + 1] = "/";
+  for (int i = 1; i < (MAXPATHLEN); i++) {
     larger_than_max[i] = 'A' + (i % 26);
   }
   larger_than_max[MAXPATHLEN] = '\0';
@@ -392,8 +393,8 @@ TEST(cgroupTest, read_number_tuple_test) {
 }
 
 TEST(cgroupTest, read_numerical_key_beyond_max_path) {
-  char larger_than_max[MAXPATHLEN + 1];
-  for (int i = 0; i < (MAXPATHLEN); i++) {
+  char larger_than_max[MAXPATHLEN + 1] = "/";
+  for (int i = 1; i < (MAXPATHLEN); i++) {
     larger_than_max[i] = 'A' + (i % 26);
   }
   larger_than_max[MAXPATHLEN] = '\0';
