@@ -71,9 +71,11 @@ static void delete_file(const char* filename) {
 }
 
 class TestController : public CgroupController {
+private:
+  static inline char slash[] = "/";
 public:
-  TestController(char* p): CgroupController((char*)"/", p, true/*ro*/) {}
-  TestController() : TestController("/") {}
+  TestController(char* p): CgroupController(slash, p, true/*ro*/) {}
+  TestController() : TestController(slash) {}
 };
 
 static void fill_file(const char* path, const char* content) {
