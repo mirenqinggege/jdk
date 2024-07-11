@@ -72,11 +72,8 @@ static void delete_file(const char* filename) {
 
 class TestController : public CgroupController {
 public:
-  TestController(char* p): CgroupController("/", p), {}
+  TestController(char* p): CgroupController((char*)"/", p, true/*ro*/) {}
   TestController() : TestController("/") {}
-  bool is_read_only() override {
-    return true; // doesn't matter
-  }
 };
 
 static void fill_file(const char* path, const char* content) {
