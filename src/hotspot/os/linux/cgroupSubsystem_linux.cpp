@@ -826,7 +826,7 @@ void CgroupSubsystem::print_version_specific_info(outputStream* st) {
  * Set directory to subsystem specific files based
  * on the contents of the mountinfo and cgroup files.
  */
-void CgroupController::set_subsystem_path(const char *cgroup_path) {
+void CgroupController::set_subsystem_path(char *cgroup_path) {
   os::free(_cgroup_path);
   _cgroup_path = os::strdup(cgroup_path);
   trim_path(0);

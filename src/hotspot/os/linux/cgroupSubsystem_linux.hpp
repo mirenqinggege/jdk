@@ -116,7 +116,7 @@ class CgroupController: public CHeapObj<mtInternal> {
     char *_path = nullptr;
 
   public:
-    void set_subsystem_path(const char *cgroup_path);
+    void set_subsystem_path(char *cgroup_path);
     char* subsystem_path() { return _path; }
     bool is_read_only() { return _read_only; }
 
@@ -261,7 +261,7 @@ class CgroupMemoryController: public CHeapObj<mtInternal> {
     virtual void print_version_specific_info(outputStream* st, julong host_mem) = 0;
     virtual bool is_read_only() = 0;
     virtual bool trim_path(size_t dir_count) = 0;
-    virtual void set_subsystem_path(const char *cgroup_path) = 0;
+    virtual void set_subsystem_path(char *cgroup_path) = 0;
     virtual char* subsystem_path() = 0;
 };
 

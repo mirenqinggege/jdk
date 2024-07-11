@@ -45,7 +45,7 @@ class CgroupV2CpuController: public CgroupCpuController {
     bool is_read_only() override {
       return reader()->is_read_only();
     }
-    void set_subsystem_path(const char *cgroup_path) { reader()->set_subsystem_path(cgroup_path); }
+    void set_subsystem_path(char *cgroup_path) { reader()->set_subsystem_path(cgroup_path); }
 };
 
 class CgroupV2MemoryController final: public CgroupMemoryController {
@@ -69,7 +69,7 @@ class CgroupV2MemoryController final: public CgroupMemoryController {
       return reader()->is_read_only();
     }
     bool trim_path(size_t dir_count) override { return reader()->trim_path(dir_count); }
-    void set_subsystem_path(const char *cgroup_path) override { reader()->set_subsystem_path(cgroup_path); }
+    void set_subsystem_path(char *cgroup_path) override { reader()->set_subsystem_path(cgroup_path); }
     char* subsystem_path() override { return reader()->subsystem_path(); }
 };
 

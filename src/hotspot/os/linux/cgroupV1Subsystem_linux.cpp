@@ -34,7 +34,7 @@
 #include "utilities/globalDefinitions.hpp"
 #include "os_linux.hpp"
 
-void CgroupV1MemoryController::set_subsystem_path(const char *cgroup_path) {
+void CgroupV1MemoryController::set_subsystem_path(char *cgroup_path) {
   reader()->set_subsystem_path(cgroup_path);
 }
  
