@@ -37,7 +37,7 @@
 void CgroupV1MemoryController::set_subsystem_path(char *cgroup_path) {
   reader()->set_subsystem_path(cgroup_path);
 }
- 
+
 static inline
 void verbose_log(julong read_mem_limit, julong host_mem) {
   if (log_is_enabled(Debug, os, container)) {
