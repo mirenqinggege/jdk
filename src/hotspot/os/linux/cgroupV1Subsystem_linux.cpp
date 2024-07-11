@@ -117,8 +117,6 @@ jlong CgroupV1MemoryController::read_mem_swap(julong host_total_memsw) {
     }
     return (jlong)-1;
   } else {
-    // Backward compatibility:
-    log_trace(os, container)("Hierarchical Memory and Swap Limit is : " JULONG_FORMAT, memswlimit);
     return (jlong)memswlimit;
   }
 }
