@@ -72,7 +72,7 @@ static void delete_file(const char* filename) {
 
 class TestController : public CgroupController {
 public:
-  TestController(const char* p): CgroupController("/", p), {}
+  TestController(char* p): CgroupController("/", p), {}
   TestController() : TestController("/") {}
   bool is_read_only() override {
     return true; // doesn't matter
@@ -100,7 +100,7 @@ TEST(cgroupTest, read_numerical_key_value_failure_cases) {
   path.print_raw(b);
   const char* base_with_slash = path.as_string(true);
 
-  TestController* controller = new TestController(os::get_temp_directory());
+  TestController* controller = new TestController((char*)os::get_temp_directory());
   constexpr julong bad = 0xBAD;
   julong x = bad;
 
@@ -146,7 +146,7 @@ TEST(cgroupTest, read_numerical_key_value_success_cases) {
   path.print_raw(b);
   const char* base_with_slash = path.as_string(true);
 
-  TestController* controller = new TestController(os::get_temp_directory());
+  TestController* controller = new TestController((char*)os::get_temp_directory());
   constexpr julong bad = 0xBAD;
   julong x = bad;
 
@@ -216,7 +216,7 @@ TEST(cgroupTest, read_string_beyond_max_path) {
 }
 
 TEST(cgroupTest, read_number_file_not_exist) {
-  TestController* unknown_path_ctrl = new TestController("/do/not/exist");
+  TestController* unknown_path_ctrl = new TestController((char*)"/do/not/exist");
   const char* test_file_path = "/file-not-found";
   constexpr julong bad = 0xBAD;
   julong result = bad;
@@ -248,7 +248,7 @@ TEST(cgroupTest, read_number_tests) {
   const char* base_with_slash = path.as_string(true);
   fill_file(test_file, "8888");
 
-  TestController* controller = new TestController(os::get_temp_directory());
+  TestController* controller = new TestController((char*)os::get_temp_directory());
   julong foo = bad;
   bool ok = controller->read_number(base_with_slash, &foo);
   EXPECT_TRUE(ok) << "Number parsing should have been successful";
@@ -301,7 +301,7 @@ TEST(cgroupTest, read_string_tests) {
   const char* base_with_slash = path.as_string(true);
   fill_file(test_file, "foo-bar");
 
-  TestController* controller = new TestController(os::get_temp_directory());
+  TestController* controller = new TestController((char*)os::get_temp_directory());
   char result[1024];
   bool ok = controller->read_string(base_with_slash, result, 1024);
   EXPECT_TRUE(ok) << "String parsing should have been successful";
@@ -367,7 +367,7 @@ TEST(cgroupTest, read_number_tuple_test) {
   const char* base_with_slash = path.as_string(true);
   fill_file(test_file, "max 10000");
 
-  TestController* controller = new TestController(os::get_temp_directory());
+  TestController* controller = new TestController((char*)os::get_temp_directory());
   jlong result = -10;
   bool ok = controller->read_numerical_tuple_value(base_with_slash, true /* use_first */, &result);
   EXPECT_TRUE(ok) << "Should be OK to read value";
@@ -408,7 +408,7 @@ TEST(cgroupTest, read_numerical_key_beyond_max_path) {
 }
 
 TEST(cgroupTest, read_numerical_key_file_not_exist) {
-  TestController* unknown_path_ctrl = new TestController("/do/not/exist");
+  TestController* unknown_path_ctrl = new TestController((char*)"/do/not/exist");
   const char* test_file_path = "/file-not-found";
   const char* key = "something";
   julong a = 0xBAD;
@@ -434,10 +434,10 @@ TEST(cgroupTest, set_cgroupv1_subsystem_path) {
   TestCase* testCases[] = { &host,
                             &container_engine };
   for (int i = 0; i < length; i++) {
-    CgroupV1Controller* ctrl = new CgroupV1Controller( testCases[i]->root_path,
-                                                       testCases[i]->mount_path,
+    CgroupV1Controller* ctrl = new CgroupV1Controller( (char*)testCases[i]->root_path,
+                                                       (char*)testCases[i]->mount_path,
                                                        true /* read-only mount */);
-    ctrl->set_subsystem_path(testCases[i]->cgroup_path);
+    ctrl->set_subsystem_path((char*)testCases[i]->cgroup_path);
     ASSERT_STREQ(testCases[i]->expected_path, ctrl->subsystem_path());
   }
 }
@@ -459,10 +459,10 @@ TEST(cgroupTest, set_cgroupv2_subsystem_path) {
   TestCase* testCases[] = { &at_mount_root,
                             &sub_path };
   for (int i = 0; i < length; i++) {
-    CgroupV2Controller* ctrl = new CgroupV2Controller( testCases[i]->root_path,
-                                                       testCases[i]->mount_path,
+    CgroupV2Controller* ctrl = new CgroupV2Controller( (char*)testCases[i]->root_path,
+                                                       (char*)testCases[i]->mount_path,
                                                        true /* read-only mount */);
-    ctrl->set_subsystem_path(testCases[i]->cgroup_path);
+    ctrl->set_subsystem_path((char*)testCases[i]->cgroup_path);
     ASSERT_STREQ(testCases[i]->expected_path, ctrl->subsystem_path());
   }
 }
