@@ -59,7 +59,7 @@ class CgroupV1MemoryController final : public CgroupMemoryController {
       return reader()->is_read_only();
     }
     bool trim_path(size_t dir_count) override { return reader()->trim_path(dir_count); }
-    const char* subsystem_path() override { return reader()->subsystem_path(); }
+    char* subsystem_path() override { return reader()->subsystem_path(); }
   private:
     jlong read_mem_swappiness();
     jlong read_mem_swap(julong host_total_memsw);

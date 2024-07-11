@@ -117,7 +117,7 @@ class CgroupController: public CHeapObj<mtInternal> {
 
   public:
     void set_subsystem_path(const char *cgroup_path);
-    const char* subsystem_path() { return _path; }
+    char* subsystem_path() { return _path; }
     bool is_read_only() { return _read_only; }
 
     /* Read a numerical value as unsigned long
@@ -235,7 +235,7 @@ class CachingCgroupController : public CHeapObj<mtInternal> {
       _metrics_cache = new CachedMetric();
       return controller()->trim_path(dir_count);
     }
-    const char* subsystem_path() { return controller()->subsystem_path(); }
+    char* subsystem_path() { return controller()->subsystem_path(); }
 };
 
 // Pure virtual class representing version agnostic CPU controllers
@@ -262,7 +262,7 @@ class CgroupMemoryController: public CHeapObj<mtInternal> {
     virtual bool is_read_only() = 0;
     virtual bool trim_path(size_t dir_count) = 0;
     virtual void set_subsystem_path(const char *cgroup_path) = 0;
-    virtual const char* subsystem_path() = 0;
+    virtual char* subsystem_path() = 0;
 };
 
 class CgroupSubsystem: public CHeapObj<mtInternal> {
