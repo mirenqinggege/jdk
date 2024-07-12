@@ -769,7 +769,7 @@ oop Reflection::new_method(const methodHandle& method, bool for_constant_pool_ac
   // Allow sun.reflect.ConstantPool to refer to <clinit> methods as java.lang.reflect.Methods.
   assert(!method()->is_object_initializer() &&
          (for_constant_pool_access || !method()->is_static_initializer()),
-         "should call new_constructor instead");
+         "Should not be the initializer");
   InstanceKlass* holder = method->method_holder();
   int slot = method->method_idnum();
 
@@ -817,7 +817,7 @@ oop Reflection::new_method(const methodHandle& method, bool for_constant_pool_ac
 
 
 oop Reflection::new_constructor(const methodHandle& method, TRAPS) {
-  assert(method()->is_object_initializer(), "should call new_method instead");
+  assert(method()->is_object_initializer(), "Should be the initializer");
 
   InstanceKlass* holder = method->method_holder();
   int slot = method->method_idnum();
