@@ -34,6 +34,11 @@
 class CgroupV1Controller: public CgroupController {
   public:
     using CgroupController::CgroupController;
+    CgroupV1Controller(char *root,
+                       char *mountpoint,
+                       bool ro) : CgroupController(root, mountpoint, ro) {}
+    CgroupV1Controller(const CgroupV1Controller& o) : CgroupController(o) {}
+    CgroupV1Controller& operator=(const CgroupV1Controller& o) = delete;
 };
 
 class CgroupV1MemoryController final : public CgroupMemoryController {

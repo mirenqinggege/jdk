@@ -29,7 +29,11 @@
 
 class CgroupV2Controller: public CgroupController {
   public:
-    using CgroupController::CgroupController;
+    CgroupV2Controller(char *root,
+                       char *mountpoint,
+                       bool ro) : CgroupController(root, mountpoint, ro) {}
+    CgroupV2Controller(const CgroupV2Controller& o) : CgroupController(o) {}
+    CgroupV2Controller& operator=(const CgroupV2Controller& o) = delete;
 };
 
 class CgroupV2CpuController: public CgroupCpuController {
