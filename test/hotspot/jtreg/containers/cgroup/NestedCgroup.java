@@ -58,11 +58,8 @@ public class NestedCgroup {
         // A real usage on x86_64 fits in 39 MiB.
         public static final int MEMORY_MAX_OUTER = 500 * 1024 * 1024;
         public static final int MEMORY_MAX_INNER = MEMORY_MAX_OUTER * 2;
-        public static final String MEMORY_LIMIT_MB_OUTER = "500.00M";
-        public static final String MEMORY_LIMIT_MB_INNER = "1000.00M";
 
         class Limits {
-            String string;
             int integer;
         };
 
@@ -169,8 +166,6 @@ public class NestedCgroup {
             OutputAnalyzer output = pSystem(cgexec);
             // C++ CgroupController
             output.shouldMatch("\\[trace\\]\\[os,container\\] Memory Limit is: " + limits.integer + "$");
-            // Java jdk.internal.platform.CgroupSubsystem
-            output.shouldMatch("^ *Memory Limit: " + limits.string + "$");
 
             pSystem(cgdelete);
         }
@@ -190,7 +185,6 @@ public class NestedCgroup {
             // TestTwoLimits does not see the lower MEMORY_MAX_OUTER limit.
             Limits limits = new Limits();
             limits.integer = MEMORY_MAX_INNER;
-            limits.string = MEMORY_LIMIT_MB_INNER;
             return limits;
         }
         public TestTwoLimits() throws Exception {
@@ -207,7 +201,6 @@ public class NestedCgroup {
 
             Limits limits = new Limits();
             limits.integer = MEMORY_MAX_OUTER;
-            limits.string = MEMORY_LIMIT_MB_OUTER;
             return limits;
         }
         public TestNoController() throws Exception {

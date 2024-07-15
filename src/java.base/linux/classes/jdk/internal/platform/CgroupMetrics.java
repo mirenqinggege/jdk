@@ -132,7 +132,7 @@ public class CgroupMetrics implements Metrics {
         // Catch the cgroup memory limit exceeding host physical memory.
         // Treat this as unlimited.
         if (subsMem >= systemTotal) {
-            return Long.MAX_VALUE;
+            return CgroupSubsystem.LONG_RETVAL_UNLIMITED;
         }
         return subsMem;
     }
@@ -155,7 +155,7 @@ public class CgroupMetrics implements Metrics {
         // and memory. Treat this case as unlimited.
         long subsSwapMem = subsystem.getMemoryAndSwapLimit();
         if (subsSwapMem >= totalSystemMemSwap) {
-            return Long.MAX_VALUE;
+            return CgroupSubsystem.LONG_RETVAL_UNLIMITED;
         }
         return subsSwapMem;
     }

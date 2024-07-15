@@ -27,10 +27,19 @@ package jdk.internal.platform.cgroupv1;
 
 public class CgroupV1MemorySubSystemController extends CgroupV1SubsystemController {
 
+    private boolean hierarchical;
     private boolean swapenabled;
 
     public CgroupV1MemorySubSystemController(String root, String mountPoint) {
         super(root, mountPoint);
+    }
+
+    boolean isHierarchical() {
+        return hierarchical;
+    }
+
+    void setHierarchical(boolean hierarchical) {
+        this.hierarchical = hierarchical;
     }
 
     boolean isSwapEnabled() {
