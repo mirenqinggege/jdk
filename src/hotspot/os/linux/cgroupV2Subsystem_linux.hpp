@@ -28,12 +28,38 @@
 #include "cgroupSubsystem_linux.hpp"
 
 class CgroupV2Controller: public CgroupController {
+  private:
+    /* the mount path of the cgroup v2 hierarchy */
+    char *_mount_path;
+    /* The cgroup path for the controller */
+    char *_cgroup_path;
+    bool _read_only;
+
+    /* Constructed full path to the subsystem directory */
+    char *_path;
+    static char* construct_path(char* mount_path, char *cgroup_path);
+
   public:
-    CgroupV2Controller(char *root,
-                       char *mountpoint,
-                       bool ro) : CgroupController(root, mountpoint, ro) {}
-    CgroupV2Controller(const CgroupV2Controller& o) : CgroupController(o) {}
-    CgroupV2Controller& operator=(const CgroupV2Controller& o) = delete;
+    CgroupV2Controller(char* mount_path,
+                       char *cgroup_path,
+                       bool ro) :  _mount_path(os::strdup(mount_path)),
+                                   _cgroup_path(os::strdup(cgroup_path)),
+                                   _read_only(ro),
+                                   _path(construct_path(mount_path, cgroup_path)) {
+    }
+    // Shallow copy constructor
+    CgroupV2Controller(const CgroupV2Controller& o) :
+                                            _mount_path(o._mount_path),
+                                            _cgroup_path(o._cgroup_path),
+                                            _read_only(o._read_only),
+                                            _path(o._path) {
+    }
+    ~CgroupV2Controller() {
+      // At least one controller exists with references to the paths
+    }
+
+    char *subsystem_path() override { return _path; }
+    bool is_read_only() override { return _read_only; }
 };
 
 class CgroupV2CpuController: public CgroupCpuController {
@@ -49,7 +75,6 @@ class CgroupV2CpuController: public CgroupCpuController {
     bool is_read_only() override {
       return reader()->is_read_only();
     }
-    void set_subsystem_path(char *cgroup_path) { reader()->set_subsystem_path(cgroup_path); }
 };
 
 class CgroupV2MemoryController final: public CgroupMemoryController {
@@ -72,9 +97,6 @@ class CgroupV2MemoryController final: public CgroupMemoryController {
     bool is_read_only() override {
       return reader()->is_read_only();
     }
-    bool trim_path(size_t dir_count) override { return reader()->trim_path(dir_count); }
-    void set_subsystem_path(char *cgroup_path) override { reader()->set_subsystem_path(cgroup_path); }
-    char* subsystem_path() override { return reader()->subsystem_path(); }
 };
 
 class CgroupV2Subsystem: public CgroupSubsystem {
@@ -86,7 +108,6 @@ class CgroupV2Subsystem: public CgroupSubsystem {
     CachingCgroupController<CgroupCpuController>* _cpu = nullptr;
 
     CgroupV2Controller* unified() { return &_unified; }
-    bool trim_path(size_t dir_count) override { return unified()->trim_path(dir_count); }
 
   public:
     CgroupV2Subsystem(CgroupV2MemoryController* memory,
@@ -95,7 +116,6 @@ class CgroupV2Subsystem: public CgroupSubsystem {
         _unified(unified),
         _memory(new CachingCgroupController<CgroupMemoryController>(memory)),
         _cpu(new CachingCgroupController<CgroupCpuController>(cpu)) {
-      initialize_hierarchy();
     }
 
     char * cpu_cpuset_cpus() override;

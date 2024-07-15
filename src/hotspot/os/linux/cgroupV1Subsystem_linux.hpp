@@ -32,13 +32,37 @@
 // Cgroups version 1 specific implementation
 
 class CgroupV1Controller: public CgroupController {
+  private:
+    /* mountinfo contents */
+    char* _root;
+    char* _mount_point;
+    bool _read_only;
+
+    /* Constructed subsystem directory */
+    char* _path;
+
   public:
-    using CgroupController::CgroupController;
     CgroupV1Controller(char *root,
                        char *mountpoint,
-                       bool ro) : CgroupController(root, mountpoint, ro) {}
-    CgroupV1Controller(const CgroupV1Controller& o) : CgroupController(o) {}
-    CgroupV1Controller& operator=(const CgroupV1Controller& o) = delete;
+                       bool ro) : _root(os::strdup(root)),
+                                  _mount_point(os::strdup(mountpoint)),
+                                  _read_only(ro),
+                                  _path(nullptr) {
+    }
+    // Shallow copy constructor
+    CgroupV1Controller(const CgroupV1Controller& o) : _root(o._root),
+                                                      _mount_point(o._mount_point),
+                                                      _read_only(o._read_only),
+                                                      _path(o._path) {
+    }
+    ~CgroupV1Controller() {
+      // At least one subsystem controller exists with paths to malloc'd path
+      // names
+    }
+
+    void set_subsystem_path(char *cgroup_path);
+    char *subsystem_path() override { return _path; }
+    bool is_read_only() { return _read_only; }
 };
 
 class CgroupV1MemoryController final : public CgroupMemoryController {
@@ -47,6 +71,7 @@ class CgroupV1MemoryController final : public CgroupMemoryController {
     CgroupV1Controller _reader;
     CgroupV1Controller* reader() { return &_reader; }
   public:
+    bool is_hierarchical() { return _uses_mem_hierarchy; }
     void set_subsystem_path(char *cgroup_path);
     jlong read_memory_limit_in_bytes(julong upper_bound) override;
     jlong memory_usage_in_bytes() override;
@@ -63,15 +88,20 @@ class CgroupV1MemoryController final : public CgroupMemoryController {
     bool is_read_only() override {
       return reader()->is_read_only();
     }
-    bool trim_path(size_t dir_count) override { return reader()->trim_path(dir_count); }
-    char* subsystem_path() override { return reader()->subsystem_path(); }
   private:
+    /* Some container runtimes set limits via cgroup
+     * hierarchy. If set to true consider also memory.stat
+     * file if everything else seems unlimited */
+    bool _uses_mem_hierarchy;
+    jlong uses_mem_hierarchy();
+    void set_hierarchical(bool value) { _uses_mem_hierarchy = value; }
     jlong read_mem_swappiness();
     jlong read_mem_swap(julong host_total_memsw);
 
   public:
     CgroupV1MemoryController(const CgroupV1Controller& reader)
-      : _reader(reader) {
+      : _reader(reader),
+        _uses_mem_hierarchy(false) {
     }
 
 };
@@ -110,7 +140,6 @@ class CgroupV1Subsystem: public CgroupSubsystem {
     jlong pids_max();
     jlong pids_current();
     bool is_containerized();
-    bool trim_path(size_t dir_count) override { return _memory->controller()->trim_path(dir_count); }
 
     const char * container_type() {
       return "cgroupv1";
@@ -137,7 +166,6 @@ class CgroupV1Subsystem: public CgroupSubsystem {
       _cpu(new CachingCgroupController<CgroupCpuController>(cpu)),
       _cpuacct(cpuacct),
       _pids(pids) {
-      initialize_hierarchy();
     }
 };
 

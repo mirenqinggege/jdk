@@ -272,6 +272,15 @@ void CgroupV2MemoryController::print_version_specific_info(outputStream* st, jul
   OSContainer::print_container_helper(st, swap_limit, "memory_swap_max_limit_in_bytes");
 }
 
+char* CgroupV2Controller::construct_path(char* mount_path, char *cgroup_path) {
+  stringStream ss;
+  ss.print_raw(mount_path);
+  if (strcmp(cgroup_path, "/") != 0) {
+    ss.print_raw(cgroup_path);
+  }
+  return os::strdup(ss.base());
+}
+
 /* pids_max
  *
  * Return the maximum number of tasks available to the process
