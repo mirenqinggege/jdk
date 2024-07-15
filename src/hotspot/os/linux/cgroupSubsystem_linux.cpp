@@ -890,30 +890,18 @@ bool CgroupController::trim_path(size_t dir_count) {
   return true;
 }
 
+// Never use a directory without controller files (disabled by "../cgroup.subtree_control").
 void CgroupSubsystem::initialize_hierarchy() {
   size_t best_level = 0;
-  jlong memory_limit_min = max_jlong;
-  jlong memory_swap_limit_min = max_jlong;
-
   for (size_t dir_count = 0; memory_controller()->trim_path(dir_count); ++dir_count) {
-    log_trace(os, container)("initialize_hierarchy: dir_count = %zu, best_level = %zu, subsystem_path = %s",
-                             dir_count, best_level, memory_controller()->subsystem_path());
+    log_trace(os, container)("initialize_hierarchy: dir_count = %zu, subsystem_path = %s",
+                             dir_count, memory_controller()->subsystem_path());
     jlong memory_limit = memory_limit_in_bytes();
-    if (memory_limit != -1 && memory_limit != OSCONTAINER_ERROR && memory_limit < memory_limit_min) {
-      memory_limit_min = memory_limit;
+    if (memory_limit != OSCONTAINER_ERROR) {
       best_level = dir_count;
-    }
-    jlong memory_swap_limit = memory_and_swap_limit_in_bytes();
-    if (memory_swap_limit != -1 && memory_swap_limit != OSCONTAINER_ERROR && memory_swap_limit < memory_swap_limit_min) {
-      memory_swap_limit_min = memory_swap_limit;
-      best_level = dir_count;
-    }
-    // Never use a directory without controller files (disabled by "../cgroup.subtree_control").
-    if (memory_limit == OSCONTAINER_ERROR && memory_swap_limit == OSCONTAINER_ERROR && best_level == dir_count) {
-      ++best_level;
+      break;
     }
   }
-
   memory_controller()->trim_path(best_level);
   log_trace(os, container)("initialize_hierarchy: best_level = %zu, subsystem_path = %s",
                            best_level, memory_controller()->subsystem_path());
