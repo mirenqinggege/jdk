@@ -51,7 +51,7 @@ import jdk.internal.javac.PreviewFeature;
  */
 @PreviewFeature(feature = PreviewFeature.Feature.CLASSFILE_API)
 public sealed interface Annotation
-        permits TypeAnnotation, AnnotationImpl {
+        permits AnnotationImpl {
 
     /**
      * {@return the class of the annotation}

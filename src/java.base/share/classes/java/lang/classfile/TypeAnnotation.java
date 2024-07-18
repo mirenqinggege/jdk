@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2022, 2024, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -25,12 +25,10 @@
 
 package java.lang.classfile;
 
-import java.lang.constant.ClassDesc;
 import java.util.List;
 
 import java.lang.classfile.attribute.RuntimeInvisibleTypeAnnotationsAttribute;
 import java.lang.classfile.attribute.RuntimeVisibleTypeAnnotationsAttribute;
-import java.lang.classfile.constantpool.Utf8Entry;
 import jdk.internal.classfile.impl.TargetInfoImpl;
 import jdk.internal.classfile.impl.UnboundAttribute;
 
@@ -56,7 +54,6 @@ import static java.lang.classfile.ClassFile.TAT_METHOD_TYPE_PARAMETER_BOUND;
 import static java.lang.classfile.ClassFile.TAT_NEW;
 import static java.lang.classfile.ClassFile.TAT_RESOURCE_VARIABLE;
 import static java.lang.classfile.ClassFile.TAT_THROWS;
-import jdk.internal.classfile.impl.TemporaryConstantPool;
 import jdk.internal.javac.PreviewFeature;
 
 /**
@@ -69,7 +66,6 @@ import jdk.internal.javac.PreviewFeature;
  */
 @PreviewFeature(feature = PreviewFeature.Feature.CLASSFILE_API)
 public sealed interface TypeAnnotation
-        extends Annotation
         permits UnboundAttribute.UnboundTypeAnnotation {
 
     /**
@@ -180,57 +176,19 @@ public sealed interface TypeAnnotation
     List<TypePathComponent> targetPath();
 
     /**
-     * {@return a type annotation}
-     * @param targetInfo which type in a declaration or expression is annotated
-     * @param targetPath which part of the type is annotated
-     * @param annotationClassUtf8Entry the annotation class
-     * @param annotationElements the annotation elements
+     * {@return the annotation on the type use target}
      */
-    static TypeAnnotation of(TargetInfo targetInfo, List<TypePathComponent> targetPath,
-                             Utf8Entry annotationClassUtf8Entry,
-                             List<AnnotationElement> annotationElements) {
-        return new UnboundAttribute.UnboundTypeAnnotation(targetInfo, targetPath,
-                annotationClassUtf8Entry, annotationElements);
-    }
+    Annotation annotation();
 
     /**
      * {@return a type annotation}
      * @param targetInfo which type in a declaration or expression is annotated
      * @param targetPath which part of the type is annotated
-     * @param annotationClass the annotation class
-     * @param annotationElements the annotation elements
+     * @param annotation the annotation
      */
     static TypeAnnotation of(TargetInfo targetInfo, List<TypePathComponent> targetPath,
-                             ClassDesc annotationClass,
-                             AnnotationElement... annotationElements) {
-        return of(targetInfo, targetPath, annotationClass, List.of(annotationElements));
-    }
-
-    /**
-     * {@return a type annotation}
-     * @param targetInfo which type in a declaration or expression is annotated
-     * @param targetPath which part of the type is annotated
-     * @param annotationClass the annotation class
-     * @param annotationElements the annotation elements
-     */
-    static TypeAnnotation of(TargetInfo targetInfo, List<TypePathComponent> targetPath,
-                             ClassDesc annotationClass,
-                             List<AnnotationElement> annotationElements) {
-        return of(targetInfo, targetPath,
-                TemporaryConstantPool.INSTANCE.utf8Entry(annotationClass.descriptorString()), annotationElements);
-    }
-
-    /**
-     * {@return a type annotation}
-     * @param targetInfo which type in a declaration or expression is annotated
-     * @param targetPath which part of the type is annotated
-     * @param annotationClassUtf8Entry the annotation class
-     * @param annotationElements the annotation elements
-     */
-    static TypeAnnotation of(TargetInfo targetInfo, List<TypePathComponent> targetPath,
-                             Utf8Entry annotationClassUtf8Entry,
-                             AnnotationElement... annotationElements) {
-        return of(targetInfo, targetPath, annotationClassUtf8Entry, List.of(annotationElements));
+                             Annotation annotation) {
+        return new UnboundAttribute.UnboundTypeAnnotation(targetInfo, targetPath, annotation);
     }
 
     /**
