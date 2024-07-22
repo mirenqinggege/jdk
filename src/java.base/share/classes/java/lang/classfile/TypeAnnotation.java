@@ -57,8 +57,11 @@ import static java.lang.classfile.ClassFile.TAT_THROWS;
 import jdk.internal.javac.PreviewFeature;
 
 /**
- * Models an annotation on a type use, as defined in {@jvms 4.7.19} and {@jvms 4.7.20}.
+ * Models an application of a type annotation, as defined in {@jvms 4.7.20} and {@jvms 4.7.21}.
+ * This model includes {@linkplain #targetInfo location of the type} and {@linkplain #targetPath
+ * the part that is annotated}, in addition to the {@linkplain #annotation type annotation}.
  *
+ * @see Annotation
  * @see RuntimeVisibleTypeAnnotationsAttribute
  * @see RuntimeInvisibleTypeAnnotationsAttribute
  *
@@ -176,15 +179,15 @@ public sealed interface TypeAnnotation
     List<TypePathComponent> targetPath();
 
     /**
-     * {@return the annotation on the type use target}
+     * {@return the type annotation applied to {@linkplain #targetPath() the given part} of the type}
      */
     Annotation annotation();
 
     /**
-     * {@return a type annotation}
+     * {@return a type annotation application}
      * @param targetInfo which type in a declaration or expression is annotated
      * @param targetPath which part of the type is annotated
-     * @param annotation the annotation
+     * @param annotation the type annotation
      */
     static TypeAnnotation of(TargetInfo targetInfo, List<TypePathComponent> targetPath,
                              Annotation annotation) {

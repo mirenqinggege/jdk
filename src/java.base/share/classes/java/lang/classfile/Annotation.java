@@ -37,10 +37,12 @@ import java.util.List;
 import jdk.internal.javac.PreviewFeature;
 
 /**
- * Models an annotation on a declaration.
+ * Models an annotation. This may be a declaration annotation, a type annotation, or
+ * an annotation in an annotation-valued element.
  *
  * @see AnnotationElement
  * @see AnnotationValue
+ * @see TypeAnnotation
  * @see RuntimeVisibleAnnotationsAttribute
  * @see RuntimeInvisibleAnnotationsAttribute
  * @see RuntimeVisibleParameterAnnotationsAttribute
